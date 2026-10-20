@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-bg-theme="ocean">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b19" />
+  <meta name="description" content="LiquidGlass Hub — iOS 27 / visionOS inspired personal media & link workspace." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>LiquidGlass Hub</title>
+
+  <!-- Inline SVG Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%23c084fc'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='26' fill='url(%23g)'/%3E%3Ccircle cx='50' cy='50' r='28' fill='rgba(255,255,255,0.25)' stroke='white' stroke-width='4'/%3E%3C/svg%3E" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Google Fonts: Inter (Fallback for SF Pro) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QRCode.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated Liquid Gradient Mesh Background -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="glass-noise"></div>
+  </div>
+
+  <!-- Confetti / Glass Burst Canvas for Redeem Celebrations -->
+  <canvas id="burst-canvas" aria-hidden="true"></canvas>
+
+  <!-- Desktop Top Navigation & Header -->
+  <header class="top-header glass-panel">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <i data-lucide="layers"></i>
+      </div>
+      <div>
+        <h1 class="brand-title">LiquidGlass</h1>
+        <span class="brand-badge">OS 27</span>
+      </div>
+    </div>
+
+    <!-- Desktop Tab Navigation -->
+    <nav class="desktop-nav" aria-label="Main Navigation">
+      <button class="nav-btn active" data-target="music" aria-selected="true">
+        <i data-lucide="music"></i>
+        <span>Sonic</span>
+      </button>
+      <button class="nav-btn" data-target="youtube" aria-selected="false">
+        <i data-lucide="tv"></i>
+        <span>Cinema</span>
+      </button>
+      <button class="nav-btn" data-target="links" aria-selected="false">
+        <i data-lucide="compass"></i>
+        <span>Nexus</span>
+      </button>
+      <button class="nav-btn" data-target="redeem" aria-selected="false">
+        <i data-lucide="sparkles"></i>
+        <span>Redeem</span>
+      </button>
+    </nav>
+
+    <!-- Actions: Active Theme Indicator & Light/Dark Toggle -->
+    <div class="header-actions">
+      <button id="install-pwa-btn" class="glass-btn icon-only hidden" aria-label="Install App" title="Install LiquidGlass App">
+        <i data-lucide="download"></i>
+      </button>
+      <button id="theme-toggle" class="glass-pill-toggle" aria-label="Toggle Light and Dark Mode">
+        <i data-lucide="sun" class="sun-icon"></i>
+        <i data-lucide="moon" class="moon-icon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main SPA Content Container -->
+  <main class="app-container">
+
+    <!-- ==========================================
+         MODULE 1: MUSIC PLAYER ("SONIC")
+         ========================================== -->
+    <section id="section-music" class="tab-section active" aria-labelledby="heading-music">
+      <div class="section-header">
+        <div>
+          <h2 id="heading-music">Sonic Spatial Audio</h2>
+          <p class="section-subtitle">Real-time Web Audio visualizer & local library</p>
+        </div>
+        <label for="audio-upload" class="glass-btn primary-btn cursor-pointer" tabindex="0">
+          <i data-lucide="upload-cloud"></i>
+          <span>Add Tracks</span>
+          <input type="file" id="audio-upload" accept="audio/*" multiple hidden />
+        </label>
+      </div>
+
+      <div class="music-grid">
+        <!-- Main Glass Player Card -->
+        <div class="glass-card player-card">
+          <div class="player-top">
+            <div class="album-art-wrapper" id="album-art-wrapper">
+              <div class="album-art-gradient" id="album-art-visual">
+                <i data-lucide="disc-3" class="disc-icon"></i>
+              </div>
+              <div class="vinyl-center"></div>
+            </div>
+
+            <div class="track-info">
+              <span class="track-badge" id="track-source-badge">Spatial Synth</span>
+              <h3 id="track-title" class="track-title">Select a Track</h3>
+              <p id="track-artist" class="track-artist">LiquidGlass Audio Engine</p>
+            </div>
+          </div>
+
+          <!-- Live Web Audio API Visualizer -->
+          <div class="visualizer-container glass-inset">
+            <canvas id="audio-visualizer" width="600" height="110" aria-label="Live audio frequency visualizer"></canvas>
+          </div>
+
+          <!-- Seek Bar & Timestamps -->
+          <div class="progress-area">
+            <input type="range" id="seek-slider" class="glass-slider" min="0" max="100" value="0" step="0.1" aria-label="Seek time" />
+            <div class="time-stamps">
+              <span id="current-time">0:00</span>
+              <span id="total-duration">0:00</span>
+            </div>
+          </div>
+
+          <!-- Transport Controls -->
+          <div class="player-controls">
+            <button id="shuffle-btn" class="glass-btn icon-only" aria-label="Toggle Shuffle" title="Shuffle">
+              <i data-lucide="shuffle"></i>
+            </button>
+            <button id="prev-btn" class="glass-btn icon-only" aria-label="Previous Track" title="Previous">
+              <i data-lucide="skip-back"></i>
+            </button>
+            <button id="play-pause-btn" class="glass-btn play-fab" aria-label="Play or Pause">
+              <i data-lucide="play" id="play-icon"></i>
+            </button>
+            <button id="next-btn" class="glass-btn icon-only" aria-label="Next Track" title="Next">
+              <i data-lucide="skip-forward"></i>
+            </button>
+            <button id="repeat-btn" class="glass-btn icon-only" aria-label="Toggle Repeat" title="Repeat">
+              <i data-lucide="repeat"></i>
+            </button>
+          </div>
+
+          <!-- Volume Bar -->
+          <div class="volume-area">
+            <button id="mute-btn" class="glass-btn icon-only sm" aria-label="Mute or Unmute">
+              <i data-lucide="volume-2" id="volume-icon"></i>
+            </button>
+            <input type="range" id="volume-slider" class="glass-slider" min="0" max="1" step="0.01" value="0.8" aria-label="Volume" />
+          </div>
+
+          <!-- Hidden HTML5 Audio Element -->
+          <audio id="html5-audio" crossorigin="anonymous"></audio>
+        </div>
+
+        <!-- Playlist & Drag-and-Drop Zone -->
+        <div class="glass-card playlist-card" id="drop-zone">
+          <div class="card-header-row">
+            <h3>Up Next Queue</h3>
+            <span class="pill-count" id="playlist-count">0 tracks</span>
+          </div>
+
+          <div class="drop-zone-banner" id="drop-banner">
+            <i data-lucide="file-audio"></i>
+            <span>Drag & drop audio files (.mp3, .wav, .ogg) anywhere here</span>
+          </div>
+
+          <ul id="playlist-ul" class="playlist-list" role="listbox" aria-label="Audio Playlist">
+            <!-- Populated by script.js -->
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         MODULE 2: YOUTUBE VIDEO PLAYER ("CINEMA")
+         ========================================== -->
+    <section id="section-youtube" class="tab-section" aria-labelledby="heading-youtube">
+      <div class="section-header">
+        <div>
+          <h2 id="heading-youtube">Cinema Theatre</h2>
+          <p class="section-subtitle">Privacy-enhanced glass stream & curated queue</p>
+        </div>
+      </div>
+
+      <!-- Add YouTube Video Form -->
+      <form id="yt-form" class="glass-card yt-input-bar">
+        <div class="input-with-icon">
+          <i data-lucide="youtube"></i>
+          <input
+            type="text"
+            id="yt-url-input"
+            class="glass-input"
+            placeholder="Paste YouTube URL or Video ID (e.g. https://youtu.be/jfKfPfyJRdk)..."
+            required
+            aria-label="YouTube Video URL"
+          />
+        </div>
+        <input
+          type="text"
+          id="yt-title-input"
+          class="glass-input yt-title-field"
+          placeholder="Custom Title (optional)"
+          aria-label="Custom Video Title"
+        />
+        <button type="submit" class="glass-btn primary-btn">
+          <i data-lucide="plus-circle"></i>
+          <span>Add & Play</span>
+        </button>
+      </form>
+
+      <!-- Main Theatre Stage -->
+      <div class="glass-card theatre-stage">
+        <div class="video-aspect-box" id="yt-stage-box">
+          <!-- Lazy loaded iframe injected here -->
+        </div>
+        <div class="theatre-meta">
+          <div>
+            <h3 id="yt-current-title">Select a video below</h3>
+            <p id="yt-current-id" class="text-muted">Privacy Mode (youtube-nocookie.com)</p>
+          </div>
+          <a id="yt-external-link" href="#" target="_blank" rel="noopener noreferrer" class="glass-btn sm">
+            <i data-lucide="external-link"></i>
+            <span>Watch on YouTube</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Saved Videos Grid -->
+      <div class="section-subheader">
+        <h3>Saved Playlist</h3>
+        <span class="pill-count" id="yt-count">0 videos</span>
+      </div>
+      <div id="yt-grid" class="glass-grid yt-cards-grid">
+        <!-- Populated by script.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         MODULE 3: LINK SHARING HUB ("NEXUS")
+         ========================================== -->
+    <section id="section-links" class="tab-section" aria-labelledby="heading-links">
+      <div class="section-header">
+        <div>
+          <h2 id="heading-links">Nexus Link Vault</h2>
+          <p class="section-subtitle">Organize, share & generate instant QR codes for your web bookmarks</p>
+        </div>
+        <button id="toggle-link-form-btn" class="glass-btn primary-btn">
+          <i data-lucide="plus"></i>
+          <span>Add Link</span>
+        </button>
+      </div>
+
+      <!-- Collapsible Add/Edit Link Form -->
+      <form id="link-form" class="glass-card link-form-card hidden" aria-label="Add or Edit Link">
+        <h3 id="link-form-heading">Add New Bookmark</h3>
+        <input type="hidden" id="link-edit-id" value="" />
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="link-title">Title *</label>
+            <input type="text" id="link-title" class="glass-input" placeholder="e.g., Apple Design Resources" required />
+          </div>
+          <div class="form-group">
+            <label for="link-url">URL *</label>
+            <input type="url" id="link-url" class="glass-input" placeholder="https://developer.apple.com" required />
+          </div>
+          <div class="form-group">
+            <label for="link-tag">Category / Tag</label>
+            <input type="text" id="link-tag" class="glass-input" placeholder="Design, Dev, AI, Reading..." />
+          </div>
+          <div class="form-group">
+            <label for="link-notes">Notes</label>
+            <input type="text" id="link-notes" class="glass-input" placeholder="Quick description or reminder..." />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="cancel-link-btn" class="glass-btn">Cancel</button>
+          <button type="submit" class="glass-btn primary-btn">
+            <i data-lucide="check"></i>
+            <span id="link-submit-label">Save Link</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Search, Filter & Sort Controls -->
+      <div class="glass-card filter-bar">
+        <div class="input-with-icon search-box">
+          <i data-lucide="search"></i>
+          <input type="search" id="link-search" class="glass-input" placeholder="Search title, URL, tags, or notes..." aria-label="Search links" />
+        </div>
+        <div class="filter-controls">
+          <select id="link-tag-filter" class="glass-select" aria-label="Filter by category">
+            <option value="ALL">All Categories</option>
+          </select>
+          <select id="link-sort" class="glass-select" aria-label="Sort links">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="az">Title (A–Z)</option>
+            <option value="za">Title (Z–A)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Links Grid -->
+      <div id="links-grid" class="glass-grid links-cards-grid">
+        <!-- Populated by script.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         MODULE 4: MEDIA REDEMPTION ("REDEEM")
+         ========================================== -->
+    <section id="section-redeem" class="tab-section" aria-labelledby="heading-redeem">
+      <div class="section-header">
+        <div>
+          <h2 id="heading-redeem">Prism Vault & Redemption</h2>
+          <p class="section-subtitle">Enter secret access codes to unlock dynamic Liquid Glass environments & perks</p>
+        </div>
+      </div>
+
+      <!-- Redemption Code Box -->
+      <div class="glass-card redeem-hero">
+        <div class="redeem-hero-content">
+          <div class="redeem-badge">
+            <i data-lucide="key-round"></i>
+            <span>REDIMATE ENGINE v2.7</span>
+          </div>
+          <h3>Have an Access Code?</h3>
+          <p>Enter a promotional or creator code below to unlock new spatial shader environments and audio enhancements.</p>
+
+          <form id="redeem-form" class="redeem-input-group">
+            <input
+              type="text"
+              id="redeem-code-input"
+              class="glass-input redeem-code-field"
+              placeholder="e.g. GLASS-2025"
+              autocomplete="off"
+              required
+              aria-label="Redemption Code"
+            />
+            <button type="submit" class="glass-btn primary-btn">
+              <i data-lucide="sparkles"></i>
+              <span>Redeem</span>
+            </button>
+          </form>
+
+          <!-- Hint Pills for Demo Testing -->
+          <div class="code-hints">
+            <span class="hint-label">Try Demo Codes (click to fill):</span>
+            <button type="button" class="hint-pill" data-code="GLASS-2025">GLASS-2025</button>
+            <button type="button" class="hint-pill" data-code="SUNSET-88">SUNSET-88</button>
+            <button type="button" class="hint-pill" data-code="CYBER-2077">CYBER-2077</button>
+            <button type="button" class="hint-pill" data-code="COSMOS-X">COSMOS-X</button>
+            <button type="button" class="hint-pill" data-code="MASTER-KEY">MASTER-KEY</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Gallery -->
+      <div class="section-subheader">
+        <h3>Environment Shaders</h3>
+        <span class="pill-count" id="unlocked-count">1 / 5 Unlocked</span>
+      </div>
+      <div id="themes-grid" class="glass-grid themes-cards-grid">
+        <!-- Populated by script.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile Floating Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav glass-panel" aria-label="Mobile Navigation">
+    <button class="nav-btn active" data-target="music" aria-label="Music Player">
+      <i data-lucide="music"></i>
+      <span>Sonic</span>
+    </button>
+    <button class="nav-btn" data-target="youtube" aria-label="YouTube Player">
+      <i data-lucide="tv"></i>
+      <span>Cinema</span>
+    </button>
+    <button class="nav-btn" data-target="links" aria-label="Link Hub">
+      <i data-lucide="compass"></i>
+      <span>Nexus</span>
+    </button>
+    <button class="nav-btn" data-target="redeem" aria-label="Redeem Codes">
+      <i data-lucide="sparkles"></i>
+      <span>Redeem</span>
+    </button>
+  </nav>
+
+  <!-- QR Code Glass Modal -->
+  <div id="qr-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
+    <div class="glass-card modal-card">
+      <div class="modal-header">
+        <h3 id="qr-modal-title">Scan QR Link</h3>
+        <button id="close-qr-modal" class="glass-btn icon-only sm" aria-label="Close QR Modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="qr-box-wrapper">
+        <div id="qr-code-container" class="qr-canvas-box"></div>
+      </div>
+      <p id="qr-modal-url" class="qr-url-text"></p>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Main Application Script -->
+  <script src="script.js"></script>
+</body>
+          </html>
